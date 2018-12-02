@@ -101,6 +101,8 @@ func TestBadRateLimiting(t *testing.T) {
 	data[parser.GetAnnotationWithPrefix("limit-connections")] = "5"
 	data[parser.GetAnnotationWithPrefix("limit-rps")] = "100"
 	data[parser.GetAnnotationWithPrefix("limit-rpm")] = "10"
+	data[parser.GetAnnotationWithPrefix("limit-burst")] = "10"
+	data[parser.GetAnnotationWithPrefix("limit-shared-size")] = "10"
 	data[parser.GetAnnotationWithPrefix("limit-rate-after")] = "100"
 	data[parser.GetAnnotationWithPrefix("limit-rate")] = "10"
 
@@ -118,10 +120,16 @@ func TestBadRateLimiting(t *testing.T) {
 		t.Errorf("expected 5 in limit by ip but %v was returend", rateLimit.Connections)
 	}
 	if rateLimit.RPS.Limit != 100 {
-		t.Errorf("expected 100 in limit by rps but %v was returend", rateLimit.RPS)
+		t.Errorf("expected 100 in limit by rps but %v was returend", rateLimit.RPS.Limit)
 	}
 	if rateLimit.RPM.Limit != 10 {
-		t.Errorf("expected 10 in limit by rpm but %v was returend", rateLimit.RPM)
+		t.Errorf("expected 10 in limit by rpm but %v was returend", rateLimit.RPM.Limit)
+	}
+	if rateLimit.RPS.Burst != 10 {
+		t.Errorf("expected 10 in burst by rps but %v was returend", rateLimit.RPS.Burst)
+	}
+	if rateLimit.RPS.SharedSize != 10 {
+		t.Errorf("expected 10 in shared size by rps but %v was returend", rateLimit.RPS.SharedSize)
 	}
 	if rateLimit.LimitRateAfter != 100 {
 		t.Errorf("expected 100 in limit by limitrateafter but %v was returend", rateLimit.LimitRateAfter)

@@ -170,6 +170,23 @@ func (a ratelimit) Parse(ing *extensions.Ingress) (interface{}, error) {
 	rps, _ := parser.GetIntAnnotation("limit-rps", ing)
 	conn, _ := parser.GetIntAnnotation("limit-connections", ing)
 
+	burst, _ := parser.GetIntAnnotation("limit-burst", ing)
+	share, _ := parser.GetIntAnnotation("limit-shared-size", ing)
+
+	var rpmBurst, rpsBurst, connBurst int
+	if burst <= 0 {
+		rpmBurst = rpm * defBurst
+		rpsBurst = rps * defBurst
+		connBurst = conn * defBurst
+	} else {
+		rpmBurst = burst
+		rpsBurst = burst
+		connBurst = burst
+	}
+	if share <= 0 {
+		share = defSharedSize
+	}
+
 	val, _ := parser.GetStringAnnotation("limit-whitelist", ing)
 
 	cidrs, err := parseCIDRs(val)
@@ -193,20 +210,20 @@ func (a ratelimit) Parse(ing *extensions.Ingress) (interface{}, error) {
 		Connections: Zone{
 			Name:       fmt.Sprintf("%v_conn", zoneName),
 			Limit:      conn,
-			Burst:      conn * defBurst,
-			SharedSize: defSharedSize,
+			Burst:      connBurst,
+			SharedSize: share,
 		},
 		RPS: Zone{
 			Name:       fmt.Sprintf("%v_rps", zoneName),
 			Limit:      rps,
-			Burst:      rps * defBurst,
-			SharedSize: defSharedSize,
+			Burst:      rpsBurst,
+			SharedSize: share,
 		},
 		RPM: Zone{
 			Name:       fmt.Sprintf("%v_rpm", zoneName),
 			Limit:      rpm,
-			Burst:      rpm * defBurst,
-			SharedSize: defSharedSize,
+			Burst:      rpmBurst,
+			SharedSize: share,
 		},
 		LimitRate:      lr,
 		LimitRateAfter: lra,

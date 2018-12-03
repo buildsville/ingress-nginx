@@ -101,8 +101,10 @@ func TestBadRateLimiting(t *testing.T) {
 	data[parser.GetAnnotationWithPrefix("limit-connections")] = "5"
 	data[parser.GetAnnotationWithPrefix("limit-rps")] = "100"
 	data[parser.GetAnnotationWithPrefix("limit-rpm")] = "10"
-	data[parser.GetAnnotationWithPrefix("limit-burst")] = "10"
-	data[parser.GetAnnotationWithPrefix("limit-shared-size")] = "10"
+	data[parser.GetAnnotationWithPrefix("limit-conn-burst")] = "15"
+	data[parser.GetAnnotationWithPrefix("limit-rps-burst")] = "50"
+	data[parser.GetAnnotationWithPrefix("limit-rpm-burst")] = "25"
+	data[parser.GetAnnotationWithPrefix("limit-shared-size")] = "20"
 	data[parser.GetAnnotationWithPrefix("limit-rate-after")] = "100"
 	data[parser.GetAnnotationWithPrefix("limit-rate")] = "10"
 
@@ -117,7 +119,7 @@ func TestBadRateLimiting(t *testing.T) {
 		t.Errorf("expected a RateLimit type")
 	}
 	if rateLimit.Connections.Limit != 5 {
-		t.Errorf("expected 5 in limit by ip but %v was returend", rateLimit.Connections)
+		t.Errorf("expected 5 in limit by ip but %v was returend", rateLimit.Connections.Limit)
 	}
 	if rateLimit.RPS.Limit != 100 {
 		t.Errorf("expected 100 in limit by rps but %v was returend", rateLimit.RPS.Limit)
@@ -125,11 +127,23 @@ func TestBadRateLimiting(t *testing.T) {
 	if rateLimit.RPM.Limit != 10 {
 		t.Errorf("expected 10 in limit by rpm but %v was returend", rateLimit.RPM.Limit)
 	}
-	if rateLimit.RPS.Burst != 10 {
-		t.Errorf("expected 10 in burst by rps but %v was returend", rateLimit.RPS.Burst)
+	if rateLimit.Connections.Burst != 15 {
+		t.Errorf("expected 15 in burst of ip but %v was returend", rateLimit.Connections.Burst)
 	}
-	if rateLimit.RPS.SharedSize != 10 {
-		t.Errorf("expected 10 in shared size by rps but %v was returend", rateLimit.RPS.SharedSize)
+	if rateLimit.RPS.Burst != 50 {
+		t.Errorf("expected 50 in burst of rps but %v was returend", rateLimit.RPS.Burst)
+	}
+	if rateLimit.RPM.Burst != 25 {
+		t.Errorf("expected 25 in burst of rpm but %v was returend", rateLimit.RPM.Burst)
+	}
+	if rateLimit.Connections.SharedSize != 20 {
+		t.Errorf("expected 20 in shared size of ip but %v was returend", rateLimit.Connections.SharedSize)
+	}
+	if rateLimit.RPS.SharedSize != 20 {
+		t.Errorf("expected 20 in shared size of rps but %v was returend", rateLimit.RPS.SharedSize)
+	}
+	if rateLimit.RPM.SharedSize != 20 {
+		t.Errorf("expected 20 in shared size of rpm but %v was returend", rateLimit.RPM.SharedSize)
 	}
 	if rateLimit.LimitRateAfter != 100 {
 		t.Errorf("expected 100 in limit by limitrateafter but %v was returend", rateLimit.LimitRateAfter)

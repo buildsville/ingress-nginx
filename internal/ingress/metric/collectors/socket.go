@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"strings"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/prometheus/client_golang/prometheus"
@@ -221,7 +222,7 @@ func (sc *SocketCollector) handleMessage(msg []byte) {
 	}
 
 	for _, stats := range statsBatch {
-		if !sc.hosts.Has(stats.Host) {
+		if !sc.hosts.Has(stats.Host) && !matchWildcardHost(sc, stats.Host) {
 			klog.V(3).Infof("skiping metric for host %v that is not being served", stats.Host)
 			continue
 		}
@@ -446,4 +447,15 @@ func deleteConstants(labels prometheus.Labels) {
 	delete(labels, "controller_namespace")
 	delete(labels, "controller_class")
 	delete(labels, "controller_pod")
+}
+
+func matchWildcardHost(sc *SocketCollector, host string) bool {
+	for h, _ := range sc.hosts {
+		if strings.HasPrefix(h, "*") {
+			if strings.HasSuffix(host, strings.TrimLeft(h, "*")) {
+				return true
+			}
+		}
+	}
+	return false
 }

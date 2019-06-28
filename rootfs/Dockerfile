@@ -19,6 +19,7 @@ CROSS_BUILD_COPY qemu-QEMUARCH-static /usr/bin/
 WORKDIR  /etc/nginx
 
 RUN clean-install \
+  net-tools \
   diffutils \
   libcap2-bin
 
